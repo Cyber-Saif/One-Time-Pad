@@ -85,15 +85,18 @@ def one_time_pad(user_key, mode, input_file):
         key = user_key        
         message = file_reader(input_file)
         #Decoding the base64
-        plain_message = base64.b64decode(message)
-        plain_message = plain_message.decode("utf-8")
-
-        if len(key) != len(plain_message):
-            print("[-] Key length and message length doesn't match")
-            exit()
-        else:
-            plaintext = xor_fuction(user_key, plain_message)
-            return key, plaintext
+        try:
+            plain_message = base64.b64decode(message)
+            plain_message = plain_message.decode("utf-8")
+            if len(key) != len(plain_message):
+                print("[-] Key length and message length doesn't match")
+                exit()
+            else:
+                plaintext = xor_fuction(user_key, plain_message)
+                return key, plaintext
+        except:
+            print("Something went wron while decrypting the data....")
+            print("Make sure that provided file contain base64 encoded data..\n")
 
 #CLI Argument Parser
 def initializing():
@@ -131,7 +134,8 @@ if __name__ == "__main__":
         #Write the ciphertext
         file_writter(key, ciphertext, None)
         print(f"\n[+] ENCRYPTION KEY:{key}")
-        print(f"\n[+] Message Encrypted, check ciphertext_log.txt\n")
+        print(f"\n[+] Message Encrypted, Key and Cipher is stored in ciphertext_log.txt\n")
+        print(f"Encrypted message stored in 'cipher.txt'\n")
         # print(f"CIPHERTEXT:{ciphertext}")
             
     elif decrypt_option:

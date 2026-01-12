@@ -6,11 +6,16 @@ import hashlib
 
 CHUNK = 64 * 1024
 
-# Generating Key
+# Generating Key``
 def key_generator(Key_length: int, key_file: str):
     """Generates an equivalent key for encryption"""
-    if key_file[:-4] != ".key":
+    if key_file[-4:] != ".key":
         key_file = key_file+".key"
+    
+    if path_validator(key_file) == True:
+        print(f"\n[!] A file with the following name '{key_file}' already exist...")
+        print(f"[!] Please use a different name...\n")
+        exit()
         
     try:
         with open(key_file, "wb+") as write_key:
@@ -21,7 +26,7 @@ def key_generator(Key_length: int, key_file: str):
         os.chmod(key_file, 0o400)
         return True, key_file
     except Exception as e:
-        print("""[-] Couldn't generate the key...\n
+        print(f"""[-] Couldn't generate the key...\n
               The following error occured\n{e}""")
         return False, None
 
@@ -130,13 +135,13 @@ def xor_function(data, key) -> bytes:
 ### Initializer Function
 def initialize(file, encrypt=False, decrypt=False):
     file_ext = pathlib.Path(file)    
-    if file_ext.suffix == ".otp":
+    if file_ext.suffix == ".encrypted":
         if encrypt == True:
             print(f"[!] Given file is already encrypted...\n[-] Quitting the program...")
             exit()
         elif decrypt == True:
             pass
-    if (file_ext.suffix != ".otp") and decrypt == True:
+    if (file_ext.suffix != ".encrypted") and decrypt == True:
         print(f"[!] The file '{file}' appear to be already encrypted...")
         exit()
 
@@ -144,12 +149,13 @@ def initialize(file, encrypt=False, decrypt=False):
 def finalize(file, encrypt=False, decrypt=False):
     current_file = file
     if encrypt == True:        
-        encrypted_file = f"{current_file}.otp"
+        encrypted_file = f"{current_file}.encrypted"
         os.rename(current_file, encrypted_file)
     elif decrypt == True:
         file_ext = pathlib.Path(current_file)
-        if file_ext.suffix == ".otp":
-            decrypted_file = current_file[:-4]
+        if file_ext.suffix == ".encrypted":
+            #decrypted_file = current_file.split(".")[-1:]
+            decrypted_file = current_file[:-10]
             os.rename(current_file, decrypted_file)
             
 #### CLI Argument Parser
@@ -179,7 +185,6 @@ def path_validator(file_path: str) -> bool:
     if file.exists():
         return True
     else:
-        print(f"[!] Couldn't locate {file_path}\n[-] Exitting the program...")
         return False
 
 def main():
@@ -207,6 +212,7 @@ def main():
     #For decryption
     elif decrypt_mode:
         if path_validator(key_file_location) != True:
+            print(f"[!] Couldn't locate {key_file_location}\n[-] Exitting the program...")
             exit()
 
         initialize(file_location, decrypt=True)

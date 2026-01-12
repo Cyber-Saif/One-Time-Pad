@@ -6,7 +6,7 @@ import hashlib
 
 CHUNK = 64 * 1024
 
-# Generating Key``
+# Generating Key
 def key_generator(Key_length: int, key_file: str):
     """Generates an equivalent key for encryption"""
     if key_file[-4:] != ".key":
@@ -41,7 +41,7 @@ def calculate_hash(file):
     except AttributeError:
         sha256_hash = hashlib.sha256()
         with open(file, "rb") as f:
-            while chunk := f.read(4096):  # Read in 4k chunks
+            while chunk := f.read(4096):
                 sha256_hash.update(chunk)
         calculated_hash = sha256_hash.hexdigest()
     

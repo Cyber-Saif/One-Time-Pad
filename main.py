@@ -63,9 +63,11 @@ def encryption(plaintext_file: str, encryption_key):
             open(encryption_key, "rb") as key:
             encrypted_data = xor_function(plaindata, key)
         
-        #Re-writing data to the file
-        with open(plaintext_file, "wb") as writer:
+        #Writing data to the file
+        temp_file = f"{plaintext_file}.tmp"
+        with open(temp_file, "wb") as writer:
             writer.write((encrypted_data))
+        os.replace(temp_file, plaintext_file)
         print("[+] File Encrypted...\n")
         
         #Hash calculator
@@ -99,8 +101,13 @@ def decryption(ciphertext_file: str, decryption_key):
         
         #Writing decrypted data to the  file
         print("[+] Writing data to the file...")
-        with open(ciphertext_file, "wb+") as plaindata:
+
+        temp_file = f"{ciphertext_file}.tmp"
+
+        with open(temp_file, "wb+") as plaindata:
             plaindata.write(decrypted_data)        
+        os.replace(temp_file, ciphertext_file)
+        
         print("[+] File decrypted!\n")
 
         #Calculating the hash after decryption
@@ -227,4 +234,3 @@ if __name__ == "__main__":
         print("[-] keyboardInterrupt......")
     except FileNotFoundError:
         print("[!] The program couldn't find the specified file, please check the path")
-        

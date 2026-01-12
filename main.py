@@ -65,9 +65,11 @@ def encryption(plaintext_file: str, encryption_key):
         
         #Writing data to the file
         temp_file = f"{plaintext_file}.tmp"
+        
         with open(temp_file, "wb") as writer:
             writer.write((encrypted_data))
         os.replace(temp_file, plaintext_file)
+        
         print("[+] File Encrypted...\n")
         
         #Hash calculator

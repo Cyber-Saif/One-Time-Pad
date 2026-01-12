@@ -11,5 +11,3 @@ python3 otp.py -f secret.txt -k secret.key -e
 ```python
 python3 otp.py -f secret.txt.encrypted -k secret.key -d
 ```
-## Caution
-! Do not lose the key

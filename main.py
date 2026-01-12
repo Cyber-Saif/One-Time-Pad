@@ -1,6 +1,5 @@
 import os
 import pathlib
-import base64
 import argparse
 import hashlib
 
@@ -13,21 +12,22 @@ def key_generator(Key_length: int, key_file: str):
         key_file = key_file+".key"
     
     if path_validator(key_file) == True:
-        print(f"\n[!] A file with the following name '{key_file}' already exist...")
-        print(f"[!] Please use a different name...\n")
-        exit()
+        raise FileExistsError(f"""\n[!] A file with the following name '{key_file}' already exist...
+                              \n[!] Please use a different name...\n""")
         
     try:
         with open(key_file, "wb+") as write_key:
-            generated_key = os.urandom(Key_length)                        
-            encoded_key = base64.b64encode(generated_key)
-            write_key.write((encoded_key))            
+            generated_key = os.urandom(Key_length)                                    
+            write_key.write((generated_key))
         print("\n[+] Encryption Key generated successfully!")
         os.chmod(key_file, 0o400)
+    
         return True, key_file
+    
     except Exception as e:
         print(f"""[-] Couldn't generate the key...\n
               The following error occured\n{e}""")
+    
         return False, None
 
 def calculate_hash(file):
@@ -82,6 +82,8 @@ def encryption(plaintext_file: str, encryption_key):
 # Decryption Function
 def decryption(ciphertext_file: str, decryption_key):
     """Decrypts the Ciphertext using the same XOR method"""
+    if os.path.getsize(decryption_key) != os.path.getsize(ciphertext_file):
+        raise ValueError("Key length mismatch — invalid OTP key")
     
     # Calculating the Hash before decryption
     calculated_hash = calculate_hash(ciphertext_file)
@@ -93,17 +95,17 @@ def decryption(ciphertext_file: str, decryption_key):
         #Reading the file and xoring it for decryption
         with open(ciphertext_file, "rb") as encrypted_data, \
             open(decryption_key, "rb") as key:
-            derypted_data = xor_function(encrypted_data, key)
+            decrypted_data = xor_function(encrypted_data, key)
         
         #Writing decrypted data to the  file
         print("[+] Writing data to the file...")
         with open(ciphertext_file, "wb+") as plaindata:
-            plaindata.write(derypted_data)        
+            plaindata.write(decrypted_data)        
         print("[+] File decrypted!\n")
 
         #Calculating the hash after decryption
         calculated_hash = calculate_hash(ciphertext_file)
-        print(f"[+] Has for the Deryptedfile {ciphertext_file}\n[+] SHA256: {calculated_hash}")
+        print(f"[+] Has for the Decryptedfile {ciphertext_file}\n[+] SHA256: {calculated_hash}")
 
         # Finalizer
         finalize(ciphertext_file, decrypt=True)
@@ -114,7 +116,7 @@ def decryption(ciphertext_file: str, decryption_key):
 ### XOR Function
 def xor_function(data, key) -> bytes:
     """Primary XOR function for both encryption and decryption"""
-    xored_bytes = []
+    xored_bytes = bytearray()
     while True:
         data_stream = data.read(CHUNK)
         key_stream = key.read(len(data_stream))
@@ -125,9 +127,8 @@ def xor_function(data, key) -> bytes:
             print("[!] The key length does not match the data length")
             break
         
-        for i in range(len(data_stream)):                        
-            xor = data_stream[i]^key_stream[i]            
-            xored_bytes.append(xor)
+        for i in range(len(data_stream)):
+            xored_bytes.append(data_stream[i] ^ key_stream[i])
         
     xored_data = bytes(xored_bytes)
     return xored_data
@@ -153,14 +154,13 @@ def finalize(file, encrypt=False, decrypt=False):
         os.rename(current_file, encrypted_file)
     elif decrypt == True:
         file_ext = pathlib.Path(current_file)
-        if file_ext.suffix == ".encrypted":
-            #decrypted_file = current_file.split(".")[-1:]
+        if file_ext.suffix == ".encrypted":            
             decrypted_file = current_file[:-10]
             os.rename(current_file, decrypted_file)
             
 #### CLI Argument Parser
 # Argument Parser
-def argumen_parser():
+def argument_parser():
     """Initializer for all CLI options"""
     parser = argparse.ArgumentParser(description="One Time Pad (OTP): Encrypt and Decrypt.")
     
@@ -188,9 +188,9 @@ def path_validator(file_path: str) -> bool:
         return False
 
 def main():
-    file_location, key_file_location, encrypt_mode, decrypt_mode = argumen_parser()
+    file_location, key_file_location, encrypt_mode, decrypt_mode = argument_parser()
     if (path_validator(file_location) != True):
-        exit()
+        raise ValueError (f"[!] Couldn't locate {file_location}\n[-] Exitting the program...")
 
     # For encryption
     if encrypt_mode:
@@ -212,8 +212,7 @@ def main():
     #For decryption
     elif decrypt_mode:
         if path_validator(key_file_location) != True:
-            print(f"[!] Couldn't locate {key_file_location}\n[-] Exitting the program...")
-            exit()
+            raise ValueError (f"[!] Couldn't locate {key_file_location}\n[-] Exitting the program...")
 
         initialize(file_location, decrypt=True)
 

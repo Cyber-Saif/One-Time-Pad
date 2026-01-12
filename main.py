@@ -17,7 +17,7 @@ def key_generator(Key_length: int, key_file: str):
         
     try:
         with open(key_file, "wb+") as write_key:
-            generated_key = os.urandom(Key_length)                                    
+            generated_key = os.urandom(Key_length)
             write_key.write((generated_key))
         print("\n[+] Encryption Key generated successfully!")
         os.chmod(key_file, 0o400)
@@ -35,7 +35,7 @@ def calculate_hash(file):
     calculated_hash = None
     try:
         with open(file, "rb") as f:
-            calculated_hash = hashlib.file_digest(f, 'sha256').hexdigest()            
+            calculated_hash = hashlib.file_digest(f, 'sha256').hexdigest()
     
     # For Older versions
     except AttributeError:
@@ -63,9 +63,11 @@ def encryption(plaintext_file: str, encryption_key):
             open(encryption_key, "rb") as key:
             encrypted_data = xor_function(plaindata, key)
         
-        #Re-writing data to the file
-        with open(plaintext_file, "wb") as writer:
+        #Writing data to the file
+        temp_file = f"{plaintext_file}.tmp"
+        with open(temp_file, "wb") as writer:
             writer.write((encrypted_data))
+        os.replace(temp_file, plaintext_file)
         print("[+] File Encrypted...\n")
         
         #Hash calculator
@@ -99,8 +101,13 @@ def decryption(ciphertext_file: str, decryption_key):
         
         #Writing decrypted data to the  file
         print("[+] Writing data to the file...")
-        with open(ciphertext_file, "wb+") as plaindata:
+
+        temp_file = f"{ciphertext_file}.tmp"
+
+        with open(temp_file, "wb+") as plaindata:
             plaindata.write(decrypted_data)        
+        os.replace(temp_file, ciphertext_file)
+        
         print("[+] File decrypted!\n")
 
         #Calculating the hash after decryption
@@ -154,7 +161,7 @@ def finalize(file, encrypt=False, decrypt=False):
         os.rename(current_file, encrypted_file)
     elif decrypt == True:
         file_ext = pathlib.Path(current_file)
-        if file_ext.suffix == ".encrypted":            
+        if file_ext.suffix == ".encrypted":
             decrypted_file = current_file[:-10]
             os.rename(current_file, decrypted_file)
             

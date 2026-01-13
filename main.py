@@ -147,11 +147,11 @@ def initialize(file, encrypt=False, decrypt=False):
     file_ext = pathlib.Path(file)    
     if file_ext.suffix == ".encrypted":
         if encrypt == True:
-            raise ValueError(f"[!] The given file is already encrypted...\n[-] Quitting the program...")            
+            raise ValueError(f"\n[!] The given file is already encrypted...")            
         elif decrypt == True:
             pass
     if (file_ext.suffix != ".encrypted") and decrypt == True:
-        raise ValueError(f"[!] The file '{file}' appears to be already decrypted...")        
+        raise ValueError(f"\n[!] The file '{file}' appears to be already decrypted...")        
 
 ### Finalizer Function
 def finalize(file, encrypt=False, decrypt=False):
@@ -219,7 +219,7 @@ def main():
     #For decryption
     elif decrypt_mode:
         if path_validator(key_file_location) != True:
-            raise ValueError (f"[!] Couldn't locate {key_file_location}")
+            raise ValueError (f"\n[!] Couldn't locate {key_file_location}")
 
         initialize(file_location, decrypt=True)
 
@@ -231,6 +231,8 @@ if __name__ == "__main__":
     try:
         main()
     except KeyboardInterrupt:
-        print("[-] keyboardInterrupt......")
+        print("\n[-] keyboardInterrupt......")
     except FileNotFoundError:
         print("[!] The program couldn't find the specified file. Please check the path.")
+    except Exception as e:
+        print(e)

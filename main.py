@@ -12,7 +12,7 @@ def key_generator(Key_length: int, key_file: str):
         key_file = key_file+".key"
     
     if path_validator(key_file) == True:
-        raise FileExistsError(f"""\n[!] A file with the following name '{key_file}' already exist...
+        raise FileExistsError(f"""\n[!] A file with the following name '{key_file}' already exists...
                               \n[!] Please use a different name...\n""")
         
     try:
@@ -26,12 +26,12 @@ def key_generator(Key_length: int, key_file: str):
     
     except Exception as e:
         print(f"""[-] Couldn't generate the key...\n
-              The following error occured\n{e}""")
+              The following error occurred\n{e}""")
     
         return False, None
 
 def calculate_hash(file):
-    """Take files as an input and return the hash"""
+    """Take files as input and return the hash"""
     calculated_hash = None
     try:
         with open(file, "rb") as f:
@@ -46,7 +46,7 @@ def calculate_hash(file):
         calculated_hash = sha256_hash.hexdigest()
     
     except Exception as e:
-        print(f"[-] An error occured while hashing the file\n{e}")
+        print(f"[-] An error occurred while hashing the file\n{e}")
     
     return calculated_hash
 
@@ -81,7 +81,7 @@ def encryption(plaintext_file: str, encryption_key):
 
     except Exception as e:
         print(f"""[-] Couldn't encrypt the file...\n
-              Following error occured {e}""")
+              Following error occurred {e}""")
 
 # Decryption Function
 def decryption(ciphertext_file: str, decryption_key):
@@ -120,7 +120,7 @@ def decryption(ciphertext_file: str, decryption_key):
         finalize(ciphertext_file, decrypt=True)
     
     except Exception as e :
-        print(f"[-] The fllowing error occured while decryptiong the file...\n {e}")
+        print(f"[-] The following error occurred while decrypting the file...\n{e}")
 
 ### XOR Function
 def xor_function(data, key) -> bytes:
@@ -133,7 +133,7 @@ def xor_function(data, key) -> bytes:
         if not data_stream:
             break
         if len(data_stream) != len(key_stream):
-            print("[!] The key length does not match the data length")
+            print("[!] The key length does not match the data length.")
             break
         
         for i in range(len(data_stream)):
@@ -147,13 +147,11 @@ def initialize(file, encrypt=False, decrypt=False):
     file_ext = pathlib.Path(file)    
     if file_ext.suffix == ".encrypted":
         if encrypt == True:
-            print(f"[!] Given file is already encrypted...\n[-] Quitting the program...")
-            exit()
+            raise ValueError(f"[!] The given file is already encrypted...\n[-] Quitting the program...")            
         elif decrypt == True:
             pass
     if (file_ext.suffix != ".encrypted") and decrypt == True:
-        print(f"[!] The file '{file}' appear to be already encrypted...")
-        exit()
+        raise ValueError(f"[!] The file '{file}' appears to be already decrypted...")        
 
 ### Finalizer Function
 def finalize(file, encrypt=False, decrypt=False):
@@ -199,7 +197,7 @@ def path_validator(file_path: str) -> bool:
 def main():
     file_location, key_file_location, encrypt_mode, decrypt_mode = argument_parser()
     if (path_validator(file_location) != True):
-        raise ValueError (f"[!] Couldn't locate {file_location}\n[-] Exitting the program...")
+        raise ValueError (f"[!] Couldn't locate {file_location}")
 
     # For encryption
     if encrypt_mode:
@@ -221,7 +219,7 @@ def main():
     #For decryption
     elif decrypt_mode:
         if path_validator(key_file_location) != True:
-            raise ValueError (f"[!] Couldn't locate {key_file_location}\n[-] Exitting the program...")
+            raise ValueError (f"[!] Couldn't locate {key_file_location}")
 
         initialize(file_location, decrypt=True)
 
@@ -235,4 +233,4 @@ if __name__ == "__main__":
     except KeyboardInterrupt:
         print("[-] keyboardInterrupt......")
     except FileNotFoundError:
-        print("[!] The program couldn't find the specified file, please check the path")
+        print("[!] The program couldn't find the specified file. Please check the path.")
